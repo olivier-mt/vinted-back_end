@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
+  cloud_name: "vintedcloud",
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
 });
