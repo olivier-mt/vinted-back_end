@@ -71,7 +71,7 @@ router.get("/offers", async (req, res) => {
     const { page, title, priceMin, priceMax, sort } = req.query;
 
     let filter = {};
-    let limit = 3;
+    let limit = 0;
     let skip = 0;
     let way = {};
 
