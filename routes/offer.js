@@ -62,7 +62,7 @@ router.post("/offer/publish", isAutenticated, async (req, res) => {
     res.status(200).json(populatedOffer);
   } catch (error) {
     console.log(error);
-    res.json("a problem occured");
+    res.json(`a problem occured ${error.message}`);
   }
 });
 
