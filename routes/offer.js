@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const isAutenticated = require("../middlewares/isAuthenticated");
 const isOwner = require("../middlewares/isOwner");
 const cloudinary = require("cloudinary").v2;
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 
 const Offer = require("../models/Offer");
 
@@ -11,16 +12,8 @@ const User = require("../models/User");
 
 router.post("/offer/publish", isAutenticated, async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      condition,
-      city,
-      brand,
-      size,
-      color,
-      price,
-    } = req.fields;
+    const { title, description, condition, city, brand, size, color, price } =
+      req.fields;
 
     let newOffer = new Offer({
       product_name: title,
@@ -62,7 +55,7 @@ router.post("/offer/publish", isAutenticated, async (req, res) => {
     res.status(200).json(populatedOffer);
   } catch (error) {
     console.log(error);
-    res.status(400).json(`a problem occured ${error.message}`);
+    res.status(400).json(`${error.message}`);
   }
 });
 
@@ -120,20 +113,38 @@ router.get("/offers", async (req, res) => {
     res.json("an error occured");
   }
 });
+// HANDLE PAYMENT
+
+router.post("/offer/pay", async (req, res) => {
+  // get token from front
+
+  try {
+    const { stripeToken, amount, title } = req.fields;
+    console.log("token==>", stripeToken);
+
+    // SEND TOKEN & INFO TO STRIPE API
+
+    const response = await stripe.charges.create({
+      amount: amount * 100,
+      currency: "eur",
+      description: title,
+      source: stripeToken,
+    });
+
+    console.log(response.status);
+    // Save transaction in DB
+
+    res.status(200).json(response.status);
+  } catch (error) {
+    console.log(error.message);
+  }
+});
 
 // MODIFY OFFER
 router.put("/offer/update/:id", isAutenticated, async (req, res) => {
   try {
-    const {
-      description,
-      price,
-      condition,
-      city,
-      brand,
-      size,
-      color,
-      name,
-    } = req.fields;
+    const { description, price, condition, city, brand, size, color, name } =
+      req.fields;
 
     let offer = await Offer.findById(req.params.id);
 
